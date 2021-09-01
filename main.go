@@ -11,6 +11,7 @@ import (
 var (
 	udpPort = flag.Int("port", constants.MinPort, "udp server port")
 	secret  = flag.String("secret", "", "start server secret")
+	ssh     = flag.String("ssh", "", "use ssh statement to connect to the target machine.\n eg.\t ./gosh -ssh root@192.168.1.1")
 	w       sync.WaitGroup
 )
 
@@ -22,7 +23,7 @@ func main() {
 		w.Wait()
 	} else {
 		// todo start terminal
-		terminal.Run()
+		terminal.Run(*ssh)
 	}
 
 }

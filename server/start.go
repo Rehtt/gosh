@@ -64,8 +64,7 @@ func run(cmd []byte, connect *net.UDPConn, addr *net.UDPAddr) {
 		out = "error secret"
 		return
 	}
-	c := utils.Cmd(string(cmd))
-	c.OutPut(func(out string) (exit bool) {
+	utils.Cmd(string(cmd), func(out string) (exit bool) {
 		o, err := utils.AesEncrypt([]byte(out), secret)
 		if err != nil {
 			out = "secret does not meet the regulations"
@@ -74,5 +73,4 @@ func run(cmd []byte, connect *net.UDPConn, addr *net.UDPAddr) {
 		connect.Write(o)
 		return false
 	})
-	c.Run()
 }
