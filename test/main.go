@@ -2,35 +2,32 @@ package main
 
 import (
 	"fmt"
-	"gosh/utils"
 	"math/rand"
-	"net"
-	"sync"
 	"time"
 )
 
 func main() {
-	ip := net.ParseIP("127.0.0.1")
-	dstAddr := &net.UDPAddr{IP: ip, Port: 58000}
-	conn, err := net.DialUDP("udp", nil, dstAddr)
-	if err != nil {
-		fmt.Println(err)
-	}
-	x := sync.WaitGroup{}
-	x.Add(1)
-	go func() {
-		data := make([]byte, 500)
-		for {
-			index, _, _ := conn.ReadFromUDP(data)
-			out, err := utils.GoshDecrypt(data[:index], []byte("ux0xw7fEbdecurxrWBu2LaSYOVNPdXiU"))
-			fmt.Println(string(out), err)
-			x.Done()
-		}
-	}()
-
-	conn.Write([]byte{252, 167, 128, 118, 136, 122, 41, 190, 235, 213, 50, 78, 196, 183, 217, 121})
-	x.Wait()
-	time.Sleep(1 * time.Second)
+	//ip := net.ParseIP("127.0.0.1")
+	//dstAddr := &net.UDPAddr{IP: ip, Port: 58000}
+	//conn, err := net.DialUDP("udp", nil, dstAddr)
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//x := sync.WaitGroup{}
+	//x.Add(1)
+	//go func() {
+	//	data := make([]byte, 500)
+	//	for {
+	//		index, _, _ := conn.ReadFromUDP(data)
+	//		out, err := utils.GoshDecrypt(data[:index], []byte("ux0xw7fEbdecurxrWBu2LaSYOVNPdXiU"))
+	//		fmt.Println(string(out), err)
+	//		x.Done()
+	//	}
+	//}()
+	//
+	//conn.Write([]byte{252, 167, 128, 118, 136, 122, 41, 190, 235, 213, 50, 78, 196, 183, 217, 121})
+	//x.Wait()
+	//time.Sleep(1 * time.Second)
 
 	//a, _ := utils.Cmd(`ssh r@127.0.0.1 "echo SDASDASqwe"`, func(out string) (exit bool) {
 	//	fmt.Println(out)
@@ -44,7 +41,23 @@ func main() {
 	//fmt.Println(o)
 	//fmt.Println(utils.AesDecrypt(o,[]byte("ux0xw7fEbdecurxrWBu2LaSYOVNPdXiU")))
 
-	fmt.Println(string(byte(64)), string(byte(39)), string(byte(46)))
+	//fmt.Println(string(byte(64)), string(byte(39)), string(byte(46)))
+	t := time.NewTimer(5 * time.Second)
+	a := time.Now()
+	go func() {
+		//for{
+		select {
+		case <-t.C:
+			fmt.Println("ww")
+			fmt.Println(time.Now().Sub(a))
+			break
+		}
+		//}
+	}()
+	time.Sleep(1 * time.Second)
+	t.Reset(10 * time.Second)
+	fmt.Println(time.Now().Sub(a))
+	select {}
 }
 
 func Shuffle(slice []byte) {

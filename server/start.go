@@ -11,7 +11,8 @@ import (
 var (
 	port   int
 	secret []byte
-	w      sync.WaitGroup
+	w      *sync.WaitGroup
+	dog    *utils.Dog
 )
 
 func Start(por int, sec []byte) {
@@ -45,6 +46,9 @@ func udp() {
 
 	defer connect.Close()
 
+	// watchdog
+	dog = utils.NewWatchDog(w)
+
 	cmd := make([]byte, 540)
 	for {
 		index, addr, err := connect.ReadFromUDP(cmd)
@@ -52,6 +56,8 @@ func udp() {
 			fmt.Println(err)
 			break
 		}
+		//
+		dog.FeedDog()
 		run(cmd[:index], connect, addr)
 	}
 }
