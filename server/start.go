@@ -25,7 +25,7 @@ func Start(por int, sec []byte, w *sync.WaitGroup) {
 	} else {
 		udp()
 	}
-	fmt.Println(0)
+	fmt.Println("error")
 	w.Done()
 }
 
@@ -39,7 +39,7 @@ func udp() {
 		return
 	}
 	// print udp port
-	fmt.Println(port)
+	fmt.Println("success", port)
 
 	defer connect.Close()
 

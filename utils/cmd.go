@@ -36,10 +36,9 @@ func (c cmd) Wait() error {
 	return c.c.Wait()
 }
 
-func SSH(cmd string, o func(out string)) error {
+func SSH(cmd string, o func(out string) bool) error {
 	a, err := Cmd("ssh "+cmd, func(out string) (exit bool) {
-		o(out)
-		return false
+		return o(out)
 	})
 	err = a.Wait()
 	return err
