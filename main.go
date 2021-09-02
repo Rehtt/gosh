@@ -5,24 +5,22 @@ import (
 	"gosh/constants"
 	"gosh/server"
 	"gosh/terminal"
-	"sync"
 )
 
 var (
 	udpPort = flag.Int("port", constants.MinPort, "udp server port")
 	secret  = flag.String("secret", "", "start server secret")
-	ssh     = flag.String("ssh", "", "use ssh statement to connect to the target machine.\n eg.\t ./gosh -ssh root@192.168.1.1")
-	w       sync.WaitGroup
+	ip      = flag.String("ip", "", "remote ssh ip")
+	port    = flag.String("p", "22", "remote ssh port")
+	user    = flag.String("u", "", "remote ssh user name")
 )
 
 func main() {
 	flag.Parse()
 	if *secret != "" {
-		w.Add(1)
-		go server.Start(*udpPort, []byte(*secret), &w)
-		w.Wait()
+		server.Start(*udpPort, []byte(*secret))
 	} else {
-		terminal.Run(*ssh)
+		terminal.Run(*ip, *port, *user)
 	}
 
 }
