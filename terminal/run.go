@@ -1,15 +1,17 @@
 package terminal
 
 import (
+	"bufio"
 	"fmt"
 	"gosh/utils"
 	"net"
+	"os"
 	"strings"
 )
 
 var (
 	udpPort string
-	secret  = string(utils.AesGenerateKey(utils.AES256))
+	secret  = utils.AesGenerateKey(utils.AES256)
 )
 
 func Run(ip, p, user string) {
@@ -32,18 +34,38 @@ func Run(ip, p, user string) {
 	if udpPort == "" {
 		return
 	}
-	openUdp(ip, udpPort)
+	startSession(ip, udpPort)
 }
 
-func openUdp(ip, port string) {
+func startSession(ip, port string) {
 	dstAddr, err := net.ResolveUDPAddr("udp", ip+":"+port)
 	conn, err := net.DialUDP("udp", nil, dstAddr)
 	if err != nil {
 		fmt.Println(err)
 	}
+	defer conn.Close()
+	// send "start" start session
+	conn.Write([]byte("start"))
+	sessionNumber := byte(0)
 	data := make([]byte, 500)
+	go func() {
+		input := bufio.NewScanner(os.Stdin)
+		for input.Scan() {
+			in := append([]byte{sessionNumber + 1}, input.Bytes()...)
+			conn.Write(in)
+		}
+	}()
 	for {
 		index, _, _ := conn.ReadFromUDP(data)
-		fmt.Println(string(data[:index]))
+		out, err := utils.GoshDecrypt(data[:index], secret)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		if sessionNumber == 0 && string(out) == "start" {
+
+		} else if sessionNumber < out[0] {
+			fmt.Println(string(out[1:]))
+		}
 	}
 }
