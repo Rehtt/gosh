@@ -29,6 +29,13 @@ func pKCS5UnPadding(origData []byte) []byte {
 	return origData[:(length - unpadding)]
 }
 
+func GoshEncrypt(origData, key []byte) ([]byte, error) {
+	o := make([]byte, 3, len(origData)+3)
+	copy(o, key)
+	o = append(o, origData...)
+	return AesEncrypt(o, key)
+}
+
 // AesEncrypt 加密
 func AesEncrypt(origData, key []byte) ([]byte, error) {
 	block, err := aes.NewCipher(key)
@@ -45,12 +52,26 @@ func AesEncrypt(origData, key []byte) ([]byte, error) {
 	return crypted, nil
 }
 
+func GoshDecrypt(crypted, key []byte) (origData []byte, err error) {
+	origData, err = AesDecrypt(crypted, key)
+	if err != nil {
+		return
+	}
+	for i := range origData[:3] {
+		if origData[i] != key[i] {
+			return nil, fmt.Errorf("error")
+		}
+	}
+	return origData[3:], nil
+}
+
 // AesDecrypt 解密
 func AesDecrypt(crypted, key []byte) (origData []byte, err error) {
 	defer func() {
 		if e := recover(); e != nil {
 			origData = nil
 			err = fmt.Errorf("%v", e)
+			return
 		}
 	}()
 	block, err := aes.NewCipher(key)
@@ -68,7 +89,7 @@ func AesDecrypt(crypted, key []byte) (origData []byte, err error) {
 }
 
 func AesGenerateKey(b int) (out []byte) {
-	m := "abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	m := "MiBrbpCHxjldncS4RJTuW1IPEQtgqXUhF7YOo06mKZL25NAVDfkey98G3wsavz"
 	for i := 0; i < b; i++ {
 		n, _ := rand.Int(rand.Reader, big.NewInt(int64(len(m))))
 		out = append(out, m[n.Int64()])

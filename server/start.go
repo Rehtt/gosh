@@ -11,22 +11,25 @@ import (
 var (
 	port   int
 	secret []byte
-	this   *sync.WaitGroup
+	w      *sync.WaitGroup
+	dog    *utils.Dog
 )
 
-func Start(por int, sec []byte, w *sync.WaitGroup) {
+func Start(por int, sec []byte) {
 	port = por
-	sec = secret
-	this = w
-	if port <= constants.MaxPort && port >= constants.MinPort {
-		for ; port <= constants.MaxPort; port++ {
+	secret = sec
+	w.Add(1)
+	go func() {
+		if port <= constants.MaxPort && port >= constants.MinPort {
+			for ; port <= constants.MaxPort; port++ {
+				udp()
+			}
+		} else {
 			udp()
 		}
-	} else {
-		udp()
-	}
-	fmt.Println(0)
-	w.Done()
+		fmt.Println("error")
+	}()
+	w.Wait()
 }
 
 func udp() {
@@ -39,40 +42,46 @@ func udp() {
 		return
 	}
 	// print udp port
-	fmt.Println(port)
+	fmt.Println("success", port)
 
 	defer connect.Close()
+
+	// watchdog
+	dog = utils.NewWatchDog(w)
 
 	cmd := make([]byte, 540)
 	for {
 		index, addr, err := connect.ReadFromUDP(cmd)
 		if err != nil {
 			fmt.Println(err)
-			continue
+			break
 		}
+		//
+		dog.FeedDog()
 		run(cmd[:index], connect, addr)
 	}
 }
 func run(cmd []byte, connect *net.UDPConn, addr *net.UDPAddr) {
 	out := ""
 	defer func() {
-		connect.WriteToUDP([]byte(out), addr)
-		this.Done()
+		if out != "" {
+			connect.WriteToUDP([]byte(out), addr)
+			w.Done()
+		}
 	}()
-	cmd, err := utils.AesDecrypt(cmd, secret)
+	cmd, err := utils.GoshDecrypt(cmd, secret)
 	if err != nil {
+		fmt.Println(err)
 		out = "error secret"
 		return
 	}
-	c := utils.Cmd(string(cmd))
-	c.OutPut(func(out string) (exit bool) {
-		o, err := utils.AesEncrypt([]byte(out), secret)
+	utils.Cmd(string(cmd), func(out string) (exit bool) {
+		o, err := utils.GoshEncrypt([]byte(out), secret)
 		if err != nil {
 			out = "secret does not meet the regulations"
 			return true
 		}
-		connect.Write(o)
+		connect.WriteToUDP(o, addr)
 		return false
 	})
-	c.Run()
 }
