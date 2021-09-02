@@ -22,7 +22,6 @@ func main() {
 		go server.Start(*udpPort, []byte(*secret), &w)
 		w.Wait()
 	} else {
-		// todo start terminal
 		terminal.Run(*ssh)
 	}
 

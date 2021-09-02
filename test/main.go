@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"gosh/utils"
+	"math/rand"
+	"time"
 )
 
 func main() {
@@ -28,11 +30,21 @@ func main() {
 	//x.Wait()
 	//time.Sleep(1 * time.Second)
 
-	a, _ := utils.Cmd(`echo \\`, func(out string) (exit bool) {
-		fmt.Println(out)
-		return true
-	})
-	a.Input.WriteString("123\n")
-	a.C.Wait()
+	//a, _ := utils.Cmd(`ssh r@127.0.0.1 "echo SDASDASqwe"`, func(out string) (exit bool) {
+	//	fmt.Println(out)
+	//	return false
+	//})
+	//a.Wait()
 
+	fmt.Println(string(utils.AesGenerateKey(utils.AES256)))
+}
+
+func Shuffle(slice []byte) {
+	r := rand.New(rand.NewSource(time.Now().Unix()))
+	for len(slice) > 0 {
+		n := len(slice)
+		randIndex := r.Intn(n)
+		slice[n-1], slice[randIndex] = slice[randIndex], slice[n-1]
+		slice = slice[:n-1]
+	}
 }

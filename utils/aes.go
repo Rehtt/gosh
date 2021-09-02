@@ -68,7 +68,7 @@ func AesDecrypt(crypted, key []byte) (origData []byte, err error) {
 }
 
 func AesGenerateKey(b int) (out []byte) {
-	m := "abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	m := "MiBrbpCHxjldncS4RJTuW1IPEQtgqXUhF7YOo06mKZL25NAVDfkey98G3wsavz"
 	for i := 0; i < b; i++ {
 		n, _ := rand.Int(rand.Reader, big.NewInt(int64(len(m))))
 		out = append(out, m[n.Int64()])
