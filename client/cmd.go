@@ -1,5 +1,7 @@
 package client
 
+import "strings"
+
 type Command interface {
 	Key() string
 	Help() string
@@ -16,7 +18,8 @@ func RegisterCmd(c Command) {
 
 func ParseCmd(src string) (Command, bool) {
 	if len(src) > 0 && src[0] == '/' {
-		if c, ok := commands[src[1:]]; ok {
+		key := strings.Split(src[1:], " ")
+		if c, ok := commands[key[0]]; ok {
 			return c, ok
 		}
 	}
