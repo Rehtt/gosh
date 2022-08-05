@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/Rehtt/RehttKit/buf"
 	"github.com/Rehtt/gosh/database"
-	"github.com/fatih/color"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/term"
 	"log"
@@ -39,13 +38,9 @@ func (c *Context) HandleShell(channel ssh.Channel) {
 	c.Term.Write([]byte("\033c"))
 	c.Term.Write(buf.NewBuf().WriteString("Welcome ").WriteString(c.User.Name).WriteString(" !\n").ToBytes(true))
 	c.Term.Write(buf.NewBuf().WriteString(strings.Join(Group.history.Range(), "")).ToBytes(true))
-	for _, cc := range Group.OnlineUsers() {
-		if cc == c {
-			continue
-		}
-		c.Term.Write(buf.NewBuf().WriteString("$[").WriteString(cc.User.Name).WriteString("] ").
-			WriteString("online\n").ToColorBytes([]color.Attribute{color.FgHiCyan}))
-	}
+
+	com, _ := ParseCmd("/showOnline")
+	com.Run(c, "")
 
 	for {
 		line, err := c.Term.ReadLine()
@@ -54,7 +49,11 @@ func (c *Context) HandleShell(channel ssh.Channel) {
 		}
 
 		fmt.Println(c.User.Name, line)
-		Group.SendMsg(line, c)
+		if cm, isCmd := ParseCmd(line); isCmd {
+			cm.Run(c, line)
+		} else {
+			Group.SendMsg(line, c)
+		}
 	}
 }
 
