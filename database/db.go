@@ -20,5 +20,6 @@ func autoMigrate(db *gorm.DB) {
 	db.AutoMigrate(
 		&UserTable{},
 		&GroupTable{},
+		&HackTable{},
 	)
 }

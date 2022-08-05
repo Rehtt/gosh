@@ -17,7 +17,16 @@ import (
 func Run(conf *conf.Conf, db *gorm.DB) error {
 	config := &ssh.ServerConfig{
 		KeyboardInteractiveCallback: authKeyboard(db),
-		ServerVersion:               "SSH-2.0-rehtt.com",
+		PasswordCallback: func(conn ssh.ConnMetadata, password []byte) (*ssh.Permissions, error) {
+			(&database.HackTable{
+				UserName:      conn.User(),
+				Password:      string(password),
+				Addr:          conn.RemoteAddr().String(),
+				ClientVersion: string(conn.ClientVersion()),
+			}).Save(db)
+			return &ssh.Permissions{Extensions: map[string]string{"hk": ""}}, nil
+		},
+		ServerVersion: "SSH-2.0-rehtt.com",
 	}
 
 	for k, v := range privateKeyMap {
@@ -52,6 +61,14 @@ func Run(conf *conf.Conf, db *gorm.DB) error {
 	}
 }
 func handleChannels(sshConn *ssh.ServerConn, channels <-chan ssh.NewChannel, db *gorm.DB) {
+	if _, ok := sshConn.Permissions.Extensions["hk"]; ok {
+		for v := range channels {
+			c, _, _ := v.Accept()
+			c.Write([]byte("请君入瓮"))
+			sshConn.Close()
+			return
+		}
+	}
 	user := database.UserTable{}.FormJson(sshConn.Permissions.Extensions["userJson"])
 
 	// 新建客户端
