@@ -13,13 +13,16 @@ import (
 type Context struct {
 	Term         *term.Terminal
 	User         *database.UserTable
+	Conn         *ssh.ServerConn
+	Group        *GroupStruct
 	windowWidth  int
 	windowHeight int
 }
 
-func NewClient(user *database.UserTable) *Context {
+func NewClient(user *database.UserTable, conn *ssh.ServerConn) *Context {
 	return &Context{
 		User: user,
+		Conn: conn,
 	}
 }
 

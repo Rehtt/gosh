@@ -54,11 +54,12 @@ func handleChannels(sshConn *ssh.ServerConn, channels <-chan ssh.NewChannel) {
 	user := database.UserTable{}.FormJson(sshConn.Permissions.Extensions["userJson"])
 
 	// 新建客户端
-	ctx := client.NewClient(user)
-	client.Group.Login(ctx)
+	ctx := client.NewClient(user, sshConn)
+	ctx.Group = client.Group
+	ctx.Group.Login(ctx)
 	go func() {
 		sshConn.Wait()
-		client.Group.Logout(ctx)
+		ctx.Group.Logout(ctx)
 	}()
 
 	prompt := buf.NewBuf().WriteString("[").WriteString(user.Name).WriteString("] > ")
