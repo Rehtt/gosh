@@ -17,6 +17,7 @@ import (
 func Run(conf *conf.Conf, db *gorm.DB) error {
 	config := &ssh.ServerConfig{
 		KeyboardInteractiveCallback: authKeyboard(db),
+		ServerVersion:               "SSH-2.0-rehtt.com",
 	}
 
 	for k, v := range privateKeyMap {
