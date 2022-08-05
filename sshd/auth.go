@@ -1,7 +1,6 @@
 package sshd
 
 import (
-	"fmt"
 	"github.com/Rehtt/gosh/database"
 	"golang.org/x/crypto/ssh"
 	"gorm.io/gorm"
@@ -13,27 +12,43 @@ func authKeyboard(db *gorm.DB) func(conn ssh.ConnMetadata, client ssh.KeyboardIn
 		username := conn.User()
 		user := (&database.UserTable{}).Get(db, username)
 		if user.ID == 0 {
-			out, err := client(conn.User(), "zc:",
-				[]string{"绑定：", "密码（输入不可见）:", "确认密码（输入不可见）:"},
-				[]bool{true, false, false})
+			out, err := client(conn.User(), "Register",
+				[]string{"绑定QQ："},
+				[]bool{true})
 			if err != nil {
 				return nil, err
 			}
-			if out[1] != out[2] {
-				return nil, fmt.Errorf("no")
-			}
-			user.Name = conn.User()
-			user.Password = &out[1]
 			user.QNo = out[0]
-		} else {
-			out, err := client(conn.User(), "login:",
-				[]string{"密码（输入不可见）:"},
-				[]bool{false})
-			if err != nil {
-				return nil, err
+			user.Name = conn.User()
+			instruction := ""
+			for {
+
+				out, err = client(conn.User(), instruction, []string{"密码（输入不可见）:", "确认密码（输入不可见）:"}, []bool{false, false})
+				if err != nil {
+					return nil, err
+				}
+				if out[0] != out[1] {
+					instruction = "Inconsistent password"
+				} else {
+					user.Password = &out[1]
+					break
+				}
 			}
-			if out[0] != *user.Password {
-				return nil, fmt.Errorf("mmcw")
+
+		} else {
+			instruction := "Login"
+			for {
+				out, err := client(conn.User(), instruction,
+					[]string{"密码（输入不可见）:"},
+					[]bool{false})
+				if err != nil {
+					return nil, err
+				}
+				if out[0] != *user.Password {
+					instruction = "Cross -password error, try again"
+				} else {
+					break
+				}
 			}
 		}
 		user.LastLoginTime = time.Now()
