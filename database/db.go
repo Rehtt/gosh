@@ -19,5 +19,6 @@ func Init(c *conf.Conf) *gorm.DB {
 func autoMigrate(db *gorm.DB) {
 	db.AutoMigrate(
 		&UserTable{},
+		&GroupTable{},
 	)
 }

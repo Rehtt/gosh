@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"github.com/Rehtt/RehttKit/buf"
 	"github.com/Rehtt/gosh/database"
+	"github.com/fatih/color"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/term"
+	"gorm.io/gorm"
 	"log"
 	"strings"
 )
@@ -15,14 +17,16 @@ type Context struct {
 	User         *database.UserTable
 	Conn         *ssh.ServerConn
 	Group        *GroupStruct
+	DB           *gorm.DB
 	windowWidth  int
 	windowHeight int
 }
 
-func NewClient(user *database.UserTable, conn *ssh.ServerConn) *Context {
+func NewClient(user *database.UserTable, conn *ssh.ServerConn, db *gorm.DB) *Context {
 	return &Context{
 		User: user,
 		Conn: conn,
+		DB:   db,
 	}
 }
 
@@ -40,7 +44,8 @@ func (c *Context) HandleShell(channel ssh.Channel) {
 	defer channel.Close()
 	c.Term.Write([]byte("\033c"))
 	c.Term.Write(buf.NewBuf().WriteString("Welcome ").WriteString(c.User.Name).WriteString(" !\n").ToBytes(true))
-	c.Term.Write(buf.NewBuf().WriteString(strings.Join(Group.history.Range(), "")).ToBytes(true))
+	c.Term.Write(buf.NewBuf().WriteString(strings.Join(Group.GetHistory10(c), "\n")).WriteByte('\n').
+		ToColorBytes([]color.Attribute{color.FgMagenta}, true))
 
 	com, _ := ParseCmd("/showOnline")
 	com.Run(c, "")

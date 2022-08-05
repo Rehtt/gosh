@@ -46,15 +46,15 @@ func Run(conf *conf.Conf, db *gorm.DB) error {
 				return
 			}
 			go ssh.DiscardRequests(req)
-			handleChannels(sConn, cha)
+			handleChannels(sConn, cha, db)
 		}(conn)
 	}
 }
-func handleChannels(sshConn *ssh.ServerConn, channels <-chan ssh.NewChannel) {
+func handleChannels(sshConn *ssh.ServerConn, channels <-chan ssh.NewChannel, db *gorm.DB) {
 	user := database.UserTable{}.FormJson(sshConn.Permissions.Extensions["userJson"])
 
 	// 新建客户端
-	ctx := client.NewClient(user, sshConn)
+	ctx := client.NewClient(user, sshConn, db)
 	ctx.Group = client.Group
 	ctx.Group.Login(ctx)
 	go func() {

@@ -2,14 +2,15 @@ package client
 
 import (
 	"github.com/Rehtt/RehttKit/buf"
-	"github.com/Rehtt/gosh/util"
+	"github.com/Rehtt/gosh/database"
 	"github.com/fatih/color"
+	"log"
+	"sort"
 	"sync"
 )
 
 type GroupStruct struct {
-	users   map[string]*Context
-	history *util.Link
+	users map[string]*Context
 }
 
 var (
@@ -22,11 +23,8 @@ func init() {
 }
 
 func NewGroup() {
-	h := util.NewLink()
-	h.SetMaxSize(10)
 	Group = &GroupStruct{
-		users:   make(map[string]*Context),
-		history: h,
+		users: make(map[string]*Context),
 	}
 }
 
@@ -64,13 +62,21 @@ func (g *GroupStruct) Send(data []byte, ignores ...*Context) {
 		cc.Term.Write(data)
 	}
 }
+
 func (g *GroupStruct) SendMsg(msg string, from *Context) {
 	b := buf.NewBuf().WriteString("[").
 		WriteString(from.User.Name).
 		WriteString("]: ").
 		WriteString(msg).
 		WriteByte('\n')
-	g.history.Write(b.ToString())
+
+	// todo use sync.pool
+	(&database.GroupTable{
+		UserID:   from.User.ID,
+		UserName: from.User.Name,
+		Msg:      msg,
+	}).Save(from.DB)
+
 	g.Send(b.ToBytes(), from)
 }
 func (g *GroupStruct) SendOnline(ctx *Context) {
@@ -84,4 +90,22 @@ func (g *GroupStruct) SendOffline(ctx *Context) {
 		WriteString(" [").WriteString(ctx.User.Name).WriteString("] offline\n")
 
 	g.Send(b.ToColorBytes([]color.Attribute{color.FgHiRed}, true))
+}
+func (g *GroupStruct) GetHistory10(ctx *Context) (out []string) {
+	data, err := database.GroupTable{}.GetLast10(ctx.DB)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+	sort.SliceStable(data, func(i, j int) bool {
+		return data[i].ID > data[j].ID
+	})
+	out = make([]string, 0, 10)
+	for _, v := range data {
+		out = append(out, buf.NewBuf().WriteString("[").
+			WriteString(v.UserName).
+			WriteString("]: ").
+			WriteString(v.Msg).ToString(true))
+	}
+	return out
 }
