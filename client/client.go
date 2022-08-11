@@ -2,7 +2,7 @@ package client
 
 import (
 	"fmt"
-	"github.com/Rehtt/RehttKit/buf"
+	"github.com/Rehtt/Kit/buf"
 	"github.com/Rehtt/gosh/database"
 	"github.com/fatih/color"
 	"golang.org/x/crypto/ssh"

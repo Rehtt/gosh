@@ -3,7 +3,7 @@ package client
 import (
 	"encoding/base64"
 	"fmt"
-	"github.com/Rehtt/RehttKit/buf"
+	"github.com/Rehtt/Kit/buf"
 	"github.com/fatih/color"
 	"strings"
 )

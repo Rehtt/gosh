@@ -1,7 +1,7 @@
 package client
 
 import (
-	"github.com/Rehtt/RehttKit/buf"
+	"github.com/Rehtt/Kit/buf"
 	"github.com/Rehtt/gosh/database"
 	"github.com/fatih/color"
 	"log"

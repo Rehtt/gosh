@@ -1,7 +1,7 @@
 package client
 
 import (
-	"github.com/Rehtt/RehttKit/buf"
+	"github.com/Rehtt/Kit/buf"
 	"github.com/fatih/color"
 )
 

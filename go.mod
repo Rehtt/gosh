@@ -3,7 +3,6 @@ module github.com/Rehtt/gosh
 go 1.19
 
 require (
-	github.com/Rehtt/RehttKit v0.0.0-20220804085151-113f8bb66fb3
 	github.com/fatih/color v1.13.0
 	github.com/glebarez/sqlite v1.4.6
 	github.com/google/wire v0.5.0
@@ -14,6 +13,7 @@ require (
 )
 
 require (
+	github.com/Rehtt/Kit v0.0.0-20220811021557-bd67c7d41b5e // indirect
 	github.com/glebarez/go-sqlite v1.17.3 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect

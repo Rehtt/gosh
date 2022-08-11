@@ -2,7 +2,7 @@ package sshd
 
 import (
 	"fmt"
-	"github.com/Rehtt/RehttKit/buf"
+	"github.com/Rehtt/Kit/buf"
 	"github.com/Rehtt/gosh/client"
 	"github.com/Rehtt/gosh/conf"
 	"github.com/Rehtt/gosh/database"
